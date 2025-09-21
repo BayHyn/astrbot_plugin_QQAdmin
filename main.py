@@ -10,6 +10,7 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_platform_adapter import (
     AiocqhttpAdapter,
 )
 from astrbot.core.star.filter.event_message_type import EventMessageType
+from data.plugins.astrbot_plugin_qqadmin.core.file_handle import FileHandle
 from .core.enhance_handel import EnhanceHandle
 from .utils import ADMIN_HELP, print_logo
 from .core.member_handle import MemberHandle
@@ -39,6 +40,7 @@ class QQAdminPlugin(Star):
         self.enhance = EnhanceHandle(self.conf)
         self.join = JoinHandle(self.conf, self.plugin_data_dir, self.admins_id)
         self.member = MemberHandle(self)
+        self.file = FileHandle(self, self.plugin_data_dir)
         self.curfew = None
         self.init_curfewHandle()
 
@@ -297,6 +299,34 @@ class QQAdminPlugin(Star):
         under_level: int = 10,
     ):
         await self.member.clear_group_member(event, inactive_days, under_level)
+
+    @filter.command("上传群文件", desc="上传群文件 <文件夹名/文件名 | 文件名>")
+    @perm_required(PermLevel.ADMIN)
+    async def upload_group_file(
+        self,
+        event: AiocqhttpMessageEvent,
+        path: str | int | None = None,
+    ):
+        await self.file.upload_group_file(event, str(path))
+
+    @filter.command("删除群文件", desc="删除群文件 <文件夹名/序号> <文件名/序号>")
+    @perm_required(PermLevel.ADMIN)
+    async def delete_group_file(
+        self,
+        event: AiocqhttpMessageEvent,
+        path: str | int | None = None,
+    ):
+        await self.file.delete_group_file(event, str(path))
+
+    @filter.command("查看群文件", desc="查看群文件 <文件夹名/序号> <文件名/序号>")
+    @perm_required(PermLevel.MEMBER)
+    async def view_group_file(
+        self,
+        event: AiocqhttpMessageEvent,
+        path: str | int | None = None,
+    ):
+        async for r in self.file.view_group_file(event, str(path)):
+            yield r
 
     @filter.command("群管帮助")
     async def qq_admin_help(self, event: AiocqhttpMessageEvent):

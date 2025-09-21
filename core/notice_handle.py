@@ -8,7 +8,7 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
 
-from ..utils import download_image, extract_image_url
+from ..utils import download_file, extract_image_url
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ class NoticeHandle:
                 f"group_notice_image_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png",
             )
             logger.debug("temp_path:", temp_path)
-            image_path = await download_image(image_url, temp_path)
+            image_path = await download_file(image_url, temp_path)
             if not image_path:
                 await event.send(event.plain_result("图片获取失败"))
                 return
