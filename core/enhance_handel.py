@@ -116,19 +116,13 @@ class EnhanceHandle:
             await event.send(event.plain_result("群内已有正在进行的禁言投票"))
             return
 
-        # 动态计算 threshold
-        base_threshold = 3
-        max_threshold = 10
-        threshold = base_threshold + ban_time // 300  # 每 300s 增加 1 票
-        threshold = max(base_threshold, min(threshold, max_threshold))
-
         expire_at = time.time() + self.conf["vote_ban"]["ttl"]
         self.vote_cache[group_id] = {
             "target": target_id,
             "votes": {},
             "ban_time": ban_time,
             "expire": expire_at,
-            "threshold": threshold,
+            "threshold": self.conf["vote_ban"]["threshold"],
         }
 
         nickname = await get_nickname(event, target_id)

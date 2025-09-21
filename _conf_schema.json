@@ -124,10 +124,16 @@
     "type": "object",
     "items": {
       "ttl": {
-        "description": "投票过期时间",
-        "hint": "过期的投票将被终止",
+        "description": "投票时长（秒）",
+        "hint": "每轮投票时长到达此值时，开始结算，赞同票多于反对票时，禁言生效",
         "type": "int",
-        "default": 600
+        "default": 120
+      },
+      "threshold": {
+        "description": "投票通过所需票数",
+        "hint": "赞同禁言的投票数到达此值时，禁言直接生效",
+        "type": "int",
+        "default": 3
       }
     }
   },
