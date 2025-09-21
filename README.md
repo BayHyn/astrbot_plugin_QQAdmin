@@ -3,7 +3,7 @@
 
 ![:name](https://count.getloli.com/@astrbot_plugin_QQAdmin?name=astrbot_plugin_QQAdmin&theme=minecraft&padding=6&offset=0&align=top&scale=1&pixelated=1&darkmode=auto)
 
-# astrbot_plugin_QQAdmin
+# astrbot_plugin_qqadmin
 
 _✨ [astrbot](https://github.com/AstrBotDevs/AstrBot) QQ群管插件 ✨_  
 
@@ -22,17 +22,7 @@ _✨ [astrbot](https://github.com/AstrBotDevs/AstrBot) QQ群管插件 ✨_
 
 ## 📦 安装
 
-- 可以直接在astrbot的插件市场搜索astrbot_plugin_QQAdmin，点击安装，耐心等待安装完成即可  
-
-- 或者可以直接克隆源码到插件文件夹：
-
-```bash
-# 克隆仓库到插件目录
-cd /AstrBot/data/plugins
-git clone https://github.com/Zhalslar/astrbot_plugin_QQAdmin
-
-# 控制台重启AstrBot
-```
+- 可以直接在astrbot的插件市场搜索astrbot_plugin_qqadmin，点击安装，耐心等待安装完成即可  
 
 ## ⌨️ 使用说明
 

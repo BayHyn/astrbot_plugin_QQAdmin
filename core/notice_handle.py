@@ -12,7 +12,7 @@ from ..utils import download_image, extract_image_url
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from data.plugins.astrbot_plugin_QQAdmin.main import QQAdminPlugin
+    from data.plugins.astrbot_plugin_qqadmin.main import QQAdminPlugin
 
 class NoticeHandle:
     def __init__(self, plugin: "QQAdminPlugin", data_dir: Path):

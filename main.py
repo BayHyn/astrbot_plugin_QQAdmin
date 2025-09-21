@@ -10,8 +10,8 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_platform_adapter import (
     AiocqhttpAdapter,
 )
 from astrbot.core.star.filter.event_message_type import EventMessageType
-from data.plugins.astrbot_plugin_QQAdmin.core.enhance_handel import EnhanceHandle
-from data.plugins.astrbot_plugin_QQAdmin.utils import ADMIN_HELP, print_logo
+from .core.enhance_handel import EnhanceHandle
+from .utils import ADMIN_HELP, print_logo
 from .core.member_handle import MemberHandle
 from .core.normal_handle import NormalHandle
 from .core.notice_handle import NoticeHandle
@@ -23,13 +23,13 @@ from .permission import (
     perm_required,
 )
 
-@register("astrbot_plugin_QQAdmin", "Zhalslar", "...", "...")
+@register("astrbot_plugin_qqadmin", "Zhalslar", "...", "...")
 class QQAdminPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         self.context = context
         self.conf = config
-        self.plugin_data_dir = StarTools.get_data_dir("astrbot_plugin_QQAdmin")
+        self.plugin_data_dir = StarTools.get_data_dir("astrbot_plugin_qqadmin")
         self.admins_id: list[str] = context.get_config().get("admins_id", [])
 
     async def initialize(self):

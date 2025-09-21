@@ -11,7 +11,7 @@ from ..utils import format_time, get_nickname
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from data.plugins.astrbot_plugin_QQAdmin.main import QQAdminPlugin
+    from data.plugins.astrbot_plugin_qqadmin.main import QQAdminPlugin
 
 
 class MemberHandle:
