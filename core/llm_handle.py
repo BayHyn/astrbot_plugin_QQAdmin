@@ -94,7 +94,7 @@ class LLMHandle:
 
         logger.info(f"正在根据 {raw_card} 的聊天记录生成新昵称...")
 
-
+        query_rounds = min(200, max(1, int(query_rounds)))
         contexts = await self.get_msg_contexts(event, target_id, query_rounds)
         if not contexts:
             await event.send(event.plain_result("聊天记录为空"))
