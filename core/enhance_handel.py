@@ -180,11 +180,6 @@ class EnhanceHandle:
         threshold = record["threshold"]
         target_id = record["target"]
 
-        # 目标不能投票（提前检查，避免把目标的票计入）
-        if voter_id == target_id:
-            await event.send(event.plain_result("你不能参与投票"))
-            return
-
         # 记录/更新该用户的立场
         record["votes"][voter_id] = agree
 
