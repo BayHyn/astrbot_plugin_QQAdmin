@@ -216,3 +216,5 @@ class EnhanceHandle:
                 f"禁言【{nickname}】：\n赞同({agree_count}/{threshold})\n反对({disagree_count}/{threshold})"
             )
         )
+
+

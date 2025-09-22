@@ -7,7 +7,8 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
 from astrbot.core.star.filter.event_message_type import EventMessageType
-from data.plugins.astrbot_plugin_qqadmin.core.file_handle import FileHandle
+from .core.file_handle import FileHandle
+from .core.llm_handle import LLMHandle
 from .core.enhance_handel import EnhanceHandle
 from .utils import ADMIN_HELP, print_logo
 from .core.member_handle import MemberHandle
@@ -39,6 +40,7 @@ class QQAdminPlugin(Star):
         self.member = MemberHandle(self)
         self.file = FileHandle(self, self.plugin_data_dir)
         self.curfew = CurfewHandle(self.context, self.plugin_data_dir)
+        self.llm = LLMHandle(self.context, self.conf)
         await self.curfew.initialize()
 
         # 初始化权限管理器
@@ -318,6 +320,11 @@ class QQAdminPlugin(Star):
     ):
         async for r in self.file.view_group_file(event, str(path)):
             yield r
+
+    @filter.command("取名", desc="根据聊天记录取个群昵称", alias={"取昵称"})
+    @perm_required(PermLevel.ADMIN, check_at=False)
+    async def ai_set_card(self, event: AiocqhttpMessageEvent, at_str: str):
+        await self.llm.ai_set_card(event, at_str)
 
     @filter.command("群管帮助")
     async def qq_admin_help(self, event: AiocqhttpMessageEvent):
