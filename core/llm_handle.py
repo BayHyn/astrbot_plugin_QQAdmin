@@ -66,7 +66,6 @@ class LLMHandle:
         get_using = self.context.get_using_provider()
         if not get_using:
             return None
-        print(contexts)
         try:
             llm_response = await get_using.text_chat(
                 system_prompt=system_prompt,
