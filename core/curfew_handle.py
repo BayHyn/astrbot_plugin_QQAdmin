@@ -1,3 +1,4 @@
+from __future__ import annotations
 import asyncio
 import json
 from pathlib import Path
@@ -58,18 +59,21 @@ class GroupCurfew:
         start_time: str,
         end_time: str,
         scheduler: AsyncIOScheduler,
+        manager: BotCurfewManager | None = None,
     ):
         self.bot = bot
         self.group_id = group_id
         self._start_time_str = start_time
         self._end_time_str = end_time
         self.scheduler = scheduler
+        self.manager = manager
         self.start_job: Job | None = None
         self.end_job: Job | None = None
         self.whole_ban_status = False
         self._lock = asyncio.Lock()
 
     async def _enable_curfew(self):
+        """开启宵禁"""
         async with self._lock:
             if self.whole_ban_status:
                 return
@@ -85,8 +89,12 @@ class GroupCurfew:
             logger.error(f"群 {self.group_id} 宵禁开启失败: {e}", exc_info=True)
             async with self._lock:
                 self.whole_ban_status = False
+            # 异常时移除群
+            if hasattr(self, "manager") and self.manager:
+                await self.manager.remove_group_on_error(self.group_id)
 
     async def _disable_curfew(self):
+        """关闭宵禁"""
         async with self._lock:
             if not self.whole_ban_status:
                 return
@@ -160,6 +168,7 @@ class BotCurfewManager:
         self.tasks: dict[str, GroupCurfew] = {}
 
     async def restore_from_store(self):
+        """恢复群聊禁言任务"""
         for group_id, times in self.bot_data.items():
             try:
                 cw = GroupCurfew(
@@ -184,15 +193,30 @@ class BotCurfewManager:
         )
         self.store.save()
 
+    async def remove_group_on_error(self, group_id: str):
+        """当群无法操作时自动移除"""
+        if group_id in self.tasks:
+            cw = self.tasks.pop(group_id)
+            cw.stop_curfew_task()
+        if group_id in self.bot_data:
+            self.bot_data.pop(group_id)
+        self._save()
+        logger.info(f"群 {group_id} 因操作失败已从宵禁任务中移除")
+
     async def enable_curfew(self, group_id: str, start_time: str, end_time: str):
+        """创建群聊的宵禁任务"""
         if group_id in self.tasks:
             self.tasks[group_id].stop_curfew_task()
-        cw = GroupCurfew(self.bot, group_id, start_time, end_time, self.scheduler)
+        cw = GroupCurfew(
+            self.bot, group_id, start_time, end_time, self.scheduler, manager=self
+        )
+
         await cw.start_curfew_task()
         self.tasks[group_id] = cw
         self._save()
 
     async def disable_curfew(self, group_id: str) -> bool:
+        """关闭群聊的宵禁任务"""
         cw = self.tasks.pop(group_id, None)
         if cw:
             cw.stop_curfew_task()
