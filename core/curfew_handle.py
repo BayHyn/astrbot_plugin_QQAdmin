@@ -242,25 +242,40 @@ class CurfewHandle:
         self.store.load()
         self.curfew_managers: dict[str, BotCurfewManager] = {}
 
+    async def _initialize_aiocqhttp_adapter(self, inst: AiocqhttpAdapter):
+        """初始化单个 AiocqhttpAdapter 的宵禁管理器"""
+        if client := inst.get_client():
+            # 等待 ws 连接完成
+            ws_connected = asyncio.Event()
+
+            @client.on_websocket_connection
+            def _(_):  # 连接成功时触发
+                ws_connected.set()
+
+            try:
+                await asyncio.wait_for(ws_connected.wait(), timeout=25)
+            except asyncio.TimeoutError:
+                logger.warning(f"{inst.metadata.id} 等待 WebSocket 连接超时")
+
+            try:
+                login_user_id = (await client.get_login_info()).get("user_id")
+                if not login_user_id:
+                    raise Exception("获取登录用户ID失败")
+                bot_id = str(login_user_id)
+                self.store.data.setdefault(bot_id, {})
+
+                curfew_mgr = BotCurfewManager(client, bot_id, self.store, self.scheduler)
+                self.curfew_managers[bot_id] = curfew_mgr
+                await curfew_mgr.restore_from_store()
+
+                logger.debug(f"{inst.metadata.id}({bot_id}) 宵禁初始化完成")
+            except Exception as e:
+                logger.error(f"{inst.metadata.id} 宵禁初始化失败: {e}")
 
     async def initialize(self):
         for inst in self.context.platform_manager.platform_insts:
             if isinstance(inst, AiocqhttpAdapter):
-                if client := inst.get_client():
-                    try:
-                        login_user_id = (await client.get_login_info()).get("user_id")
-                        if not login_user_id:
-                            raise Exception("获取登录用户ID失败")
-                        bot_id = str(login_user_id)
-                        self.store.data.setdefault(bot_id, {})
-                        curfew_mgr = BotCurfewManager(
-                            client, bot_id, self.store, self.scheduler
-                        )
-                        self.curfew_managers[bot_id] = curfew_mgr
-                        await curfew_mgr.restore_from_store()
-                        logger.debug(f"{inst.metadata.id}({bot_id})宵禁初始化完成")
-                    except Exception as e:
-                        logger.error(f"{inst.metadata.id}宵禁初始化失败: {e}")
+                await self._initialize_aiocqhttp_adapter(inst)
 
 
     @staticmethod
