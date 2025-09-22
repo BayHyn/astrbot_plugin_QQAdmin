@@ -245,7 +245,7 @@
         "default": "管理员"
       },
       "set_group_special_title_me": {
-        "description": "我要头衔",
+        "description": "申请头衔",
         "type": "string",
         "options": [
           "超管",
@@ -521,7 +521,7 @@
         "default": "成员"
       },
       "agree_add_group": {
-        "description": "同意",
+        "description": "批准（进群申请）",
         "type": "string",
         "options": [
           "超管",
@@ -533,7 +533,7 @@
         "default": "高等级成员"
       },
       "refuse_add_group": {
-        "description": "拒绝",
+        "description": "驳回（进群申请）",
         "type": "string",
         "options": [
           "超管",
