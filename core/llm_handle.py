@@ -80,7 +80,9 @@ class LLMHandle:
 
 
 
-    async def ai_set_card(self, event: AiocqhttpMessageEvent, at_str: str):
+    async def ai_set_card(
+        self, event: AiocqhttpMessageEvent, at_str: str, query_rounds: int
+    ):
         """让AI设置群友的群名片"""
         at_ids = get_ats(event)
         if not at_ids:
@@ -88,7 +90,6 @@ class LLMHandle:
             return
 
         target_id: str = at_ids[0]
-        query_rounds = 15
         raw_card = at_str.removeprefix("@").split("(")[0]
 
         logger.info(f"正在根据 {raw_card} 的聊天记录生成新昵称...")

@@ -321,10 +321,12 @@ class QQAdminPlugin(Star):
         async for r in self.file.view_group_file(event, str(path)):
             yield r
 
-    @filter.command("取名", desc="根据聊天记录取个群昵称", alias={"取昵称"})
+    @filter.command("取名", desc="取名@群友 <抽取消息轮数>", alias={"取昵称"})
     @perm_required(PermLevel.ADMIN, check_at=False)
-    async def ai_set_card(self, event: AiocqhttpMessageEvent, at_str: str):
-        await self.llm.ai_set_card(event, at_str)
+    async def ai_set_card(
+        self, event: AiocqhttpMessageEvent, at_str: str, query_rounds: int = 20
+    ):
+        await self.llm.ai_set_card(event, at_str, query_rounds)
 
     @filter.command("群管帮助")
     async def qq_admin_help(self, event: AiocqhttpMessageEvent):
