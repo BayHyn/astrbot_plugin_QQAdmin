@@ -6,9 +6,6 @@ from astrbot.core import AstrBotConfig
 from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
     AiocqhttpMessageEvent,
 )
-from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_platform_adapter import (
-    AiocqhttpAdapter,
-)
 from astrbot.core.star.filter.event_message_type import EventMessageType
 from data.plugins.astrbot_plugin_qqadmin.core.file_handle import FileHandle
 from .core.enhance_handel import EnhanceHandle
@@ -41,8 +38,8 @@ class QQAdminPlugin(Star):
         self.join = JoinHandle(self.conf, self.plugin_data_dir, self.admins_id)
         self.member = MemberHandle(self)
         self.file = FileHandle(self, self.plugin_data_dir)
-        self.curfew = None
-        self.init_curfewHandle()
+        self.curfew = CurfewHandle(self.context, self.plugin_data_dir)
+        await self.curfew.initialize()
 
         # 初始化权限管理器
         PermissionManager.get_instance(
@@ -57,15 +54,10 @@ class QQAdminPlugin(Star):
     @filter.on_platform_loaded()
     async def on_platform_loaded(self):
         """平台加载完成时"""
-        if not self.curfew:
-            self.init_curfewHandle()
+        if not self.curfew.curfew_managers:
+            await self.curfew.initialize()
 
-    def init_curfewHandle(self):
-        platform_insts = self.context.platform_manager.platform_insts
-        for inst in platform_insts:
-            if isinstance(inst, AiocqhttpAdapter):
-                if cilent := inst.get_client():
-                    self.curfew = CurfewHandle(cilent)
+
 
     @filter.command("禁言", desc="禁言 <秒数> @群友")
     @perm_required(PermLevel.ADMIN)
@@ -225,19 +217,18 @@ class QQAdminPlugin(Star):
         input_start_time: str | None = None,
         input_end_time: str | None = None,
     ):
-        if self.curfew:
-            await self.curfew.start_curfew(
-                event,
-                input_start_time,
-                input_end_time,
-            )
+        await self.curfew.start_curfew(
+            event,
+            input_start_time,
+            input_end_time,
+        )
 
     @filter.command("关闭宵禁", desc="关闭本群的宵禁任务")
     @filter.event_message_type(filter.EventMessageType.GROUP_MESSAGE)
     @perm_required(PermLevel.ADMIN)
     async def stop_curfew(self, event: AiocqhttpMessageEvent):
-        if self.curfew:
-            await self.curfew.stop_curfew(event)
+        await self.curfew.stop_curfew(event)
+
 
     @filter.command("添加进群关键词", desc="添加自动批准进群的关键词")
     @perm_required(PermLevel.ADMIN)
@@ -249,7 +240,7 @@ class QQAdminPlugin(Star):
     async def remove_accept_keyword(self, event: AiocqhttpMessageEvent):
         await self.join.remove_accept_keyword(event)
 
-    @filter.command("进群关键词", desc="查看进群关键词", alias={"查看进群关键词"})
+    @filter.command("查看进群关键词", desc="查看进群关键词", alias={"进群关键词"})
     @perm_required(PermLevel.ADMIN)
     async def view_accept_keywords(self, event: AiocqhttpMessageEvent):
         await self.join.view_accept_keywords(event)
@@ -264,7 +255,7 @@ class QQAdminPlugin(Star):
     async def remove_reject_ids(self, event: AiocqhttpMessageEvent):
         await self.join.remove_reject_ids(event)
 
-    @filter.command("进群黑名单", desc="查看进群黑名单", alias={"查看进群黑名单"})
+    @filter.command("查看进群黑名单", desc="查看进群黑名单", alias={"进群黑名单"})
     @perm_required(PermLevel.ADMIN)
     async def view_reject_ids(self, event: AiocqhttpMessageEvent):
         await self.join.view_reject_ids(event)
@@ -336,6 +327,5 @@ class QQAdminPlugin(Star):
 
     async def terminate(self):
         """可选择实现异步的插件销毁方法，当插件被卸载/停用时会调用。"""
-        if self.curfew:
-            await self.curfew.stop_all_tasks()
+        await self.curfew.stop_all_tasks()
         logger.info("插件 astrbot_plugin_QQAdmin 已优雅关闭")
